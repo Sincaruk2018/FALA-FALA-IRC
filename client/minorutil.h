@@ -7,5 +7,5 @@
 #endif
 
 #ifndef PORT
-#define PORT 1024
+#define PORT 8080
 #endif

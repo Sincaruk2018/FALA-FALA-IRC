@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 #include <sys/socket.h>
 #include "minorutil.h"
 
@@ -49,17 +50,17 @@ int main() {
 		}
 		aux_socket = socket(AF_INET, SOCK_STREAM, 0); // Try again
 	}
-	printf("Got Socket sucessfully, you can start to chat now:\n\n\n\n\n\n\");
+	printf("Got Socket sucessfully, you can start to chat now:\n\n\n\n\n\n");
 	fprintf(verbose,"Socket number: %d\n", aux_socket);
 
 	/* Connect. Refine this */
 	socket_address.sin_family = AF_INET;
 	socket_address.sin_port = htons(PORT);
-	inet_pton_status = inet_pton(AF_INET,"127.0.0.69", &socket_address.sin_addr);
+	inet_pton_status = inet_pton(AF_INET,"127.0.0.1", &socket_address.sin_addr);
 
 	if (inet_pton_status <= 0){
 		printf("Invalid address, try another.");
-		fprintf(verbose,"Couldn't use address 127.0.0.69\ninet status:%d\n",inet_pton_status);
+		fprintf(verbose,"Couldn't use address 127.0.0.1\ninet status:%d\n",inet_pton_status);
 		return -1;
 	}
 
@@ -75,7 +76,7 @@ int main() {
 	}*/
 
 	client_status = connect(aux_socket, (struct sockaddr*)&socket_address, sizeof(socket_address));
-	if (client_status <= 0) {
+	if (client_status < 0) {
 		printf("Couldn't connect client");
 		fprintf(verbose, "Client FAILED\n");
 		return -1;
@@ -90,7 +91,7 @@ int main() {
 			fgets(message, 4096, stdin); //Reads user input
 			listening_state = 0; // No more messages, for now
 			listening_server_state = 1; //time to hear the server
-			send(message, strlen(message), 0);
+			send(aux_socket, message, strlen(message), 0);
 		}
 
 		/*Send*/ 
