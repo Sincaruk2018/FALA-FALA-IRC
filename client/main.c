@@ -81,33 +81,22 @@ int main() {
 		return -1;
 	}
 
-	servalue = 0;
-	listening_server_state = 1;
-	listening_state = 0;
+	
 	while (1) {
-		if (listening_state){ // Chat is ready to listen to message
-			printf("Message: ");
-			fgets(message, 4096, stdin); //Reads user input
-			listening_state = 0; // No more messages, for now
-			listening_server_state = 1; //time to hear the server
-			send(message, strlen(message), 0);
-		}
+		printf("Message: ");
+		fgets(message, 4096, stdin); //Reads user input
+		listening_state = 0; // No more messages, for now
+		listening_server_state = 1; //time to hear the server
+		send(message, strlen(message), 0);
 
 		/*Send*/ 
 		/*printf("(Sending...)\n");
 		printf(" (Sent)\n");*/
-		if (listening_server_state == 1)
-		{
-			servalue = read(aux_socket, recieved, 4096);
-		}
-		if (servalue > 0)
-		{
-			listening_state = 1;
-			listening_server_state = 0;
+		
+		servalue = read(aux_socket, recieved, 4096);
+		if (servalue > 0){
 			printf("Server: %s\n", recieved);
-
 		}
-
 	}
 	fclose(verbose);
 	return 0;
