@@ -1,13 +1,13 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
 #define PORT 8080
 #define DOMAIN "127.0.0.1"
 
-struct sockaddr_in address;
 
 int createServerOnPort() {
     int server_fd;
@@ -19,7 +19,8 @@ int createServerOnPort() {
 int awaitConnectionOnPort(int server, int port) {
     int opt = 1;
     int new_socket;
-    int addrlen = sizeof(struct sockaddr_in);
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
 
     // connect to a given port
     if (setsockopt(server, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
@@ -44,10 +45,10 @@ int awaitConnectionOnPort(int server, int port) {
         return -1;
     }
 
-    if (new_socket = accept(server, (struct sockaddr*)&address,
-                            (socklen_t*)&addrlen) < 0) {
-        printf("Houve algum erro ao aceitar cliente\n");
-        return 1;
+    if ((new_socket = accept(server, (struct sockaddr*)&address,
+                  (socklen_t*)&addrlen)) < 0) {
+        perror("accept");
+        exit(EXIT_FAILURE);
     }
 
     return new_socket;
@@ -55,7 +56,8 @@ int awaitConnectionOnPort(int server, int port) {
 
 void sendMessage(int socket, char* msg) {
     // envia mensagem
-    send(socket, msg, sizeof(msg), 0);
+    send(socket, msg, strlen(msg), 0);
+    printf("Mensagem enviada\n");
 }
 
 void readMessage(int socket) {
@@ -87,9 +89,11 @@ int main() {
     int conn_socket = awaitConnectionOnPort(server, 8080);
     if (conn_socket < 0) {
         printf("Não foi possível se conectar a um cliente\n");
+    } else {
+        printf("Conexão realizada com sucesso %d\n", conn_socket);
     }
 
-    readMessage(server);
+    readMessage(conn_socket);
 
     char* msg = "Mensagem enviada pelo servidor";
     sendMessage(conn_socket, msg);
