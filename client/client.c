@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -60,15 +61,24 @@ int main()
 		printf("Connection Successful!\nConnected at: %s:%hu\n", buf, ntohs(server_address.sin_port));
 	}
 
-	int valread;
-	char* hello = "Hello from client";
-	char buffer[1024] = { 0 };
-	
+	char message[4096];
+	char recieved[4096];
+	int nbytes;
+	while(1) {    // get message from stdin
+		printf("Client: ");
+		fgets(message, 4096, stdin);
 
-	send(mySocket, hello, strlen(hello), 0);
-	printf("Hello message sent\n");
-	valread = read(mySocket, buffer, 1024);
-	printf("%s\n", buffer);
+		if(send(mySocket, message, strlen(message), 0) < 0) {   // write message to server
+			printf("Error on send\n");
+			exit(1);
+		}					
+		if((nbytes=read(mySocket,recieved, 100))==-1) {     // read message from server
+			printf("Error read\n");
+			exit(1);
+		}
+		recieved[nbytes]='\0';
+		printf("Server: %s\n", recieved);
+   }
 
 	// closing the connected socket
 	close(mySocket);
