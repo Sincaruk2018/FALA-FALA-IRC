@@ -54,19 +54,22 @@ int awaitConnectionOnPort(int server, int port) {
     return new_socket;
 }
 
-void sendMessage(int socket, char* msg) {
+int sendMessage(int socket) {
     // envia mensagem
-    send(socket, msg, strlen(msg), 0);
-    printf("Mensagem enviada\n");
+    char msg[4096];
+    printf("Server: ");
+    fgets(msg, 4096, stdin); //Reads user input
+    return send(socket, msg, strlen(msg), 0);
 }
 
-void readMessage(int socket) {
+int readMessage(int socket) {
     // lê mensagem
     int valread;
     char buffer[1024] = {0};
 
     valread = read(socket, buffer, 1024);
-    printf("%s\n", buffer);
+    printf("Client: %s\n", buffer);
+    return valread;
 }
 
 void closeConnection(int socket) {
@@ -90,14 +93,22 @@ int main() {
     if (conn_socket < 0) {
         printf("Não foi possível se conectar a um cliente\n");
     } else {
-        printf("Conexão realizada com sucesso %d\n", conn_socket);
+        printf("Conexão realizada com sucesso\n");
     }
 
-    readMessage(conn_socket);
+    int command = 0;
 
-    char* msg = "Mensagem enviada pelo servidor";
-    sendMessage(conn_socket, msg);
+    while(1) {
+        if(readMessage(conn_socket) < 0) {
+            break;
+        }
 
+        if(sendMessage(conn_socket) < 0) {
+            break;
+        }
+    }
+
+    printf("Encerrando conexão\n");
     closeConnection(conn_socket);
     closeServer(server);
 
