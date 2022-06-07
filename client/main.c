@@ -28,9 +28,10 @@
 int main() {
 	FILE* verbose;
 	struct sockaddr_in socket_address; 
-	int aux_socket, inet_pton_status, client_status;
+	int aux_socket, inet_pton_status, client_status, servalue, listening_server_state;
 	int count_error = 0;
 	int listening_state = 1;
+	int listening_outside = 1;
 	char message[4096];
 	char recieved[4096];
 	printf("Starting Client...");
@@ -80,19 +81,32 @@ int main() {
 		return -1;
 	}
 
+	servalue = 0;
+	listening_server_state = 1;
+	listening_state = 0;
 	while (1) {
 		if (listening_state){ // Chat is ready to listen to message
 			printf("Message: ");
 			fgets(message, 4096, stdin); //Reads user input
 			listening_state = 0; // No more messages, for now
-			return -1;
+			listening_server_state = 1; //time to hear the server
+			send(message, strlen(message), 0);
 		}
 
 		/*Send*/ 
-		printf("(Sending...)\n");
-		send(message, strlen(message), 0);
-		printf(" (Sent)\n");
-		printf("Server: ");
+		/*printf("(Sending...)\n");
+		printf(" (Sent)\n");*/
+		if (listening_server_state == 1)
+		{
+			servalue = read(aux_socket, recieved, 4096);
+		}
+		if (servalue > 0)
+		{
+			listening_state = 1;
+			listening_server_state = 0;
+			printf("Server: %s\n", recieved);
+
+		}
 
 	}
 	fclose(verbose);
