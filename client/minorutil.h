@@ -5,3 +5,7 @@
 #ifndef MAX_ERROR
 #define MAX_ERROR 256
 #endif
+
+#ifndef PORT
+#define PORT 1024
+#endif
