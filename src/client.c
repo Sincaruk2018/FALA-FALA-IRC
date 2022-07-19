@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "utils.h"
@@ -74,9 +75,16 @@ int main() {
         printf("Conectado em: %s:%hu\n", buf, ntohs(server_address.sin_port));
       }
 
-      char usernameSend[] = {"Client"};
-      char usernameRead[] = {"Server"};
-      readAndSendMessages(mySocket, usernameSend, usernameRead);
+      // define id aleatório para nome do cliente
+      char usernameSend[] = {"Client "};
+      char buffer[255];
+      srand(time(NULL));
+      int id = rand() % 100;
+      sprintf(buffer, "%d", id);
+      strcat(usernameSend, buffer);
+
+      // faz leitura e envia mensagens
+      readAndSendMessages(mySocket, usernameSend);
 
       printf("Encerrando conexão\n\n");
     } else {

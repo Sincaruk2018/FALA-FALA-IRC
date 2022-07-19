@@ -47,22 +47,7 @@ int awaitConnectionOnPort(int server, int port) {
     return -1;
   }
 
-  // connect client
-  if ((new_socket = accept(server, (struct sockaddr*)&address,
-                           (socklen_t*)&addrlen)) < 0) {
-    perror("accept");
-    exit(EXIT_FAILURE);
-  }
-
-  return new_socket;
-}
-
-/* Send a message to the client */
-int sendMessage(int socket) {
-  char msg[4096];
-  printf("Server: ");
-  fgets(msg, 4096, stdin);  // Reads user input
-  return send(socket, msg, strlen(msg), 0);
+  return 0;
 }
 
 /* Read client message */
@@ -82,26 +67,33 @@ void closeConnection(int socket) { close(socket); }
 void closeServer(int server) { shutdown(server, SHUT_RDWR); }
 
 int main() {
-  int server = createServer();
-  if (server < 0) {
+  int serverSocket = createServer();
+  if (serverSocket < 0) {
     printf("Houve  algum erro ao criar servidor\n");
     return 1;
   }
 
-  int conn_socket = awaitConnectionOnPort(server, PORT);
+  int conn_socket = awaitConnectionOnPort(serverSocket, PORT);
   if (conn_socket < 0) {
     printf("Não foi possível se conectar a um cliente\n");
   } else {
-    printf("Conexão realizada com sucesso\n");
+    printf("Esperando conexões\n");
   }
 
-  char usernameSend[] = {"Server"};
-  char usernameRead[] = {"Client"};
-  readAndSendMessages(conn_socket, usernameSend, usernameRead);
+  int maxClients = 30;
+  int clientSocket[30];
+
+  // inicializa os sockets dos clientes com 0
+  for (int i = 0; i < maxClients; i++) {
+    clientSocket[i] = 0;
+  }
+
+  // Escuta porta esperando clientes se conectarem
+  readAndSendMessagesServer(serverSocket, maxClients, clientSocket);
 
   printf("Encerrando conexão\n");
   closeConnection(conn_socket);
-  closeServer(server);
+  closeServer(serverSocket);
 
   return 0;
 }

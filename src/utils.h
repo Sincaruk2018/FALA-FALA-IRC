@@ -18,4 +18,6 @@
 #define DOMAIN "127.0.0.1"
 #endif
 
-int readAndSendMessages(int socket, char* usernameSend, char* usernameRead);
+int readAndSendMessages(int socket, char* usernameSend);
+int readAndSendMessagesServer(int serverSocket, int maxClients,
+                              int* clientSocket);
