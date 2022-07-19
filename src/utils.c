@@ -23,6 +23,8 @@ int readAndSendMessages(int socket, char* usernameSend, char* usernameRead) {
   r_set = all_set;
   char buf[BUF_SIZE], reply[BUF_SIZE];
 
+  char quitCommand[] = "quit\n";
+
   while (1) {
     r_set = all_set;
 
@@ -34,13 +36,17 @@ int readAndSendMessages(int socket, char* usernameSend, char* usernameRead) {
 
     if (FD_ISSET(STDIN_FILENO, &r_set)) {
       if (fgets(buf, BUF_SIZE, stdin)) {
+        // command  quit
+        if (strcmp(buf, quitCommand) == 0) {
+          printf("digitou quit\n");
+          return 0;
+        }
+
         // Send message to client
         if (send(socket, buf, strlen(buf) + 1, 0) < 0) {
           puts("Send failed");
           return -1;
         }
-
-        printf("%s: ", usernameSend);
       }
     }
 
@@ -51,8 +57,16 @@ int readAndSendMessages(int socket, char* usernameSend, char* usernameRead) {
         return -1;
       }
 
-      printf("\n%s: %s\n", usernameRead, reply);
-      printf("%s: ", usernameSend);
+      if (strcmp(reply, "ping\n") == 0) {
+        // Send pong
+        send(socket, "pong\0", 5, 0);
+        printf("\n%s: ping\n", usernameRead);
+        printf("PONG\n");
+      } else {
+        // read message
+        printf("\n%s: %s\n", usernameRead, reply);
+      }
+
       reply[0] = '\0';
     }
   }

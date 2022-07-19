@@ -2,13 +2,13 @@
 all : utils server client
 
 utils:
-	g++ -o utils.o -c src/utils.c
+	gcc -o utils.o -c src/utils.c
 
 server:
-	g++ -o server utils.o src/server.c
+	gcc -o server utils.o src/server.c
 
 client:
-	g++ -o client utils.o src/client.c
+	gcc -o client utils.o src/client.c
 
 clean:
 	rm -f *.o server client

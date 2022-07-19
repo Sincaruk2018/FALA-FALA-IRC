@@ -49,18 +49,40 @@ int main() {
   mySocket = setupSocket();
   if (mySocket == -1) return 0;
 
-  if (Connect(mySocket, &server_address) == -1)
-    return 0;
-  else {
-    char buf[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &(server_address.sin_addr), buf, INET_ADDRSTRLEN);
-    printf("Connection Successful!\nConnected at: %s:%hu\n", buf,
-           ntohs(server_address.sin_port));
-  }
+  char command[100] = "begin";
 
-  char usernameSend[] = {"Client"};
-  char usernameRead[] = {"Server"};
-  readAndSendMessages(mySocket, usernameSend, usernameRead);
+  while (strcmp(command, "quit") != 0) {
+    printf(
+        "Digite qual comando gostaria de executar:\n"
+        "connect - conectar ao servidor\n"
+        "quit - sair da aplicação\n"
+        "ping - checar conexão com servidor\n"
+        "Comando: ");
+    scanf("%s", command);
+
+    if (strcmp(command, "ping") == 0) {
+      printf("\nping\n\n");
+    } else if (strcmp(command, "connect") == 0) {
+      printf(
+          "\nConectando ao servidor, digite 'quit' para encerrar a conexão\n");
+
+      if (Connect(mySocket, &server_address) == -1) {
+        printf("Não foi possível realizar a conexão. Tente novamente\n");
+      } else {
+        char buf[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &(server_address.sin_addr), buf, INET_ADDRSTRLEN);
+        printf("Conectado em: %s:%hu\n", buf, ntohs(server_address.sin_port));
+      }
+
+      char usernameSend[] = {"Client"};
+      char usernameRead[] = {"Server"};
+      readAndSendMessages(mySocket, usernameSend, usernameRead);
+
+      printf("Encerrando conexão\n\n");
+    } else {
+      printf("\nComando não reconhecindo tente novamente\n\n");
+    }
+  }
 
   // closing the connected socket
   close(mySocket);

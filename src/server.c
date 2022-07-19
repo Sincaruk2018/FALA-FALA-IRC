@@ -88,7 +88,7 @@ int main() {
     return 1;
   }
 
-  int conn_socket = awaitConnectionOnPort(server, 8080);
+  int conn_socket = awaitConnectionOnPort(server, PORT);
   if (conn_socket < 0) {
     printf("Não foi possível se conectar a um cliente\n");
   } else {

@@ -7,7 +7,7 @@
 #endif
 
 #ifndef PORT
-#define PORT 8080
+#define PORT 8082
 #endif
 
 #ifndef BUF_SIZE
