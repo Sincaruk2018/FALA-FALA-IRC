@@ -1,14 +1,17 @@
 
-all : utils server client
+all : utils commands server client
 
 utils:
 	gcc -o utils.o -c src/utils.c
 
+commands:
+	gcc -o commands.o -c src/commands.c
+
 server:
-	gcc -o server utils.o src/server.c
+	gcc -o server utils.o commands.o src/server.c
 
 client:
-	gcc -o client utils.o src/client.c
+	gcc -o client utils.o commands.o src/client.c
 
 clean:
 	rm -f *.o server client
