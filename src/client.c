@@ -7,6 +7,9 @@
 #include <unistd.h>
 
 #include "utils.h"
+#include "commands.h"
+
+
 
 int setupAdress(struct sockaddr_in* addr, char* domain, int port) {
   addr->sin_family = AF_INET;
@@ -51,24 +54,37 @@ int main() {
   if (mySocket == -1) return 0;
 
   char command[100] = "begin";
+  char usernameSend[] = {"Client "}; // Default username
+  srand(time(NULL));
+  int id = rand() % 100;
+  int isMuted = 0;
+  int permission = 1; // everyone has permissions for this exercise 
 
-  while (strcmp(command, "quit") != 0) {
-    printf(
-        "Digite qual comando gostaria de executar:\n"
-        "connect - conectar ao servidor\n"
-        "quit - sair da aplicação\n"
-        "ping - checar conexão com servidor\n"
-        "Comando: ");
+
+
+  PrintComands();
+  while(1)
+  {
+    printf("Comando: ");
     scanf("%s", command);
+    int sel = LSCommands(command);
+    if(sel == CONNECT){
+      break;
+    }
+    if (sel == PING || sel == QUIT || sel == HELP){
+      ExecuteCommand(command, NULL, 0, "teste");
+    }
+    else{
+      printf("Comando inválido nesta situação");
+    }
 
-    if (strcmp(command, "ping") == 0) {
-      printf("\nping\n\n");
-    } else if (strcmp(command, "connect") == 0) {
-      printf(
-          "\nConectando ao servidor, digite 'quit' para encerrar a conexão\n");
+  }
+  
 
-      if (Connect(mySocket, &server_address) == -1) {
+  while (1) {
+    if (Connect(mySocket, &server_address) == -1) {
         printf("Não foi possível realizar a conexão. Tente novamente\n");
+        break;
       } else {
         char buf[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &(server_address.sin_addr), buf, INET_ADDRSTRLEN);
@@ -76,20 +92,16 @@ int main() {
       }
 
       // define id aleatório para nome do cliente
-      char usernameSend[] = {"Client "};
       char buffer[255];
-      srand(time(NULL));
-      int id = rand() % 100;
       sprintf(buffer, "%d", id);
       strcat(usernameSend, buffer);
 
       // faz leitura e envia mensagens
-      readAndSendMessages(mySocket, usernameSend);
-
-      printf("Encerrando conexão\n\n");
-    } else {
-      printf("\nComando não reconhecindo tente novamente\n\n");
-    }
+      int readStats = readAndSendMessages(mySocket, usernameSend, &isMuted);
+      if(readStats == END_PROGRAM) {
+        printf("Encerrando conexão\n\n");
+        break;
+      } 
   }
 
   // closing the connected socket

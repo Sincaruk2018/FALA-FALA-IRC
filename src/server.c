@@ -84,11 +84,13 @@ int main() {
   int clientSocket[30];
 
   // inicializa os sockets dos clientes com 0
+  // Clients sockets' started with 0
   for (int i = 0; i < maxClients; i++) {
     clientSocket[i] = 0;
   }
 
   // Escuta porta esperando clientes se conectarem
+  // Listening to port waiting clients connecting
   readAndSendMessagesServer(serverSocket, maxClients, clientSocket);
 
   printf("Encerrando conexão\n");

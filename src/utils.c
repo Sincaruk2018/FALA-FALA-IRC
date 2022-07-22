@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "commands.h"
 
 #include <fcntl.h>  // used to be able to get input non blocking
 #include <netinet/in.h>
@@ -13,7 +14,8 @@ select is used to detect whether the connection has something to
 receive or if the get input is ready to be send, after is detected
 we can execute the blocking methods (fgets, recv, send)
 */
-int readAndSendMessages(int socket, char* usernameSend) {
+int readAndSendMessages(int socket, char* usernameSend, int* isMuted) {
+  int commandID = -1;
   int rc;
   fd_set all_set, r_set;
 
@@ -35,13 +37,27 @@ int readAndSendMessages(int socket, char* usernameSend) {
     }
 
     if (FD_ISSET(STDIN_FILENO, &r_set)) {
-      if (fgets(buf, BUF_SIZE, stdin)) {
+      if (fgets(buf, BUF_SIZE, stdin)) { 
         // command  quit
-        if (strcmp(buf, quitCommand) == 0) {
+        /*if (strcmp(buf, quitCommand) == 0) {
           printf("Desconectando\n");
           return 0;
-        }
+        }*/
 
+        /* EN: Changed the logic. Instead of using strcmp on the main function and here, we got
+        a new module to deal with commands. Instead of doing lots of stcmp, we can compare only
+        the first char for commands, which improves efficiency
+
+        PT-BR: Mudei a lógica. AO invés de usar strcmp na função main e aqui, nós temos um módulo
+        novo para lidar com comandos. Ao invés de fazer vários strcmp, nós podemos comparar apenas
+        o primeiro char para comandos, o que melhora a eficiência.
+        
+        */
+        if(buf[0] == '/'){
+          commandID = ExecuteCommand(buf,usernameSend,1,"teste");
+          if (commandID == 0) return END_PROGRAM;
+        }
+        
         // Send message to client
         char str[4096];
         strcpy(str, usernameSend);
